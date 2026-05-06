@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SETRAM - AI Feedback Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-navy: #003087;
+            --primary-orange: #F5A623;
+            --text-dark: #0f172a;
+            --text-light: #ffffff;
+            --bg-light: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Sora', system-ui, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ==================== BOOTLOADER ==================== */
+        #bootloader {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, var(--primary-navy) 0%, #001a4a 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeOut 0.5s ease-in-out 4.5s forwards;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+
+        .bootloader-content {
+            text-align: center;
+            animation: slideUp 0.8s ease-out 0.3s both;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .bootloader-logo {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary-navy), var(--primary-orange));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin: 0 auto 20px;
+            animation: scaleIn 0.6s ease-out 0.5s both;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .bootloader-text {
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+
+        .bootloader-text h1 {
+            font-size: 36px;
+            font-weight: 900;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .bootloader-text p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .progress-bar {
+            width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 30px auto;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-orange);
+            animation: fillProgress 4s ease-out;
+        }
+
+        @keyframes fillProgress {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        /* ==================== HEADER ==================== */
+        header {
+            background: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-navy), var(--primary-orange));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 24px;
+        }
+
+        .logo-text h1 {
+            font-size: 22px;
+            color: var(--primary-navy);
+            margin: 0;
+            font-weight: 800;
+        }
+
+        .logo-text p {
+            font-size: 11px;
+            color: var(--primary-orange);
+            margin: 0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-feedback {
+            background: linear-gradient(135deg, var(--primary-navy), var(--primary-orange));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: transform 0.3s;
+        }
+
+        .btn-feedback:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ==================== HERO ==================== */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-navy) 0%, #001a4a 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .hero h2 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            font-weight: 900;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ==================== FEATURES ==================== */
+        .features {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .features h2 {
+            font-size: 36px;
+            text-align: center;
+            margin-bottom: 50px;
+            font-family: 'Playfair Display', serif;
+            font-weight: 800;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            padding: 30px;
+            background: var(--bg-light);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .feature-card h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: var(--primary-navy);
+            font-weight: 700;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* ==================== CHAT MODAL ==================== */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 20, 50, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-navy), #001a4a);
+            color: white;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            transition: background 0.3s;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .chat-message {
+            display: flex;
+            gap: 12px;
+            animation: slideInMessage 0.3s ease-out;
+        }
+
+        @keyframes slideInMessage {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-user {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message-user .message-bubble {
+            background: var(--primary-navy);
+            color: white;
+        }
+
+        .message-ai .message-bubble {
+            background: var(--bg-light);
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+        }
+
+        .form-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--primary-navy);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px 12px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary-orange);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .qa-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .qa-item {
+            margin-bottom: 16px;
+            padding: 12px;
+            background: var(--bg-light);
+            border-radius: 8px;
+        }
+
+        .qa-question {
+            font-weight: 600;
+            color: var(--primary-navy);
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .qa-answer {
+            font-size: 13px;
+            color: #475569;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            background: var(--bg-light);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--primary-navy), var(--primary-orange));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: transform 0.3s;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .status-message {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .status-message.active {
+            display: block;
+        }
+
+        .status-success {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .status-loading {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* ==================== FLOATING BUTTON ==================== */
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-navy), var(--primary-orange));
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            box-shadow: 0 5px 20px rgba(0, 48, 135, 0.3);
+            transition: transform 0.3s;
+            z-index: 50;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* ==================== FOOTER ==================== */
+        footer {
+            background: var(--primary-navy);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        footer p {
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        /* ==================== RESPONSIVE ==================== */
+        @media (max-width: 768px) {
+            .hero h2 {
+                font-size: 32px;
+            }
+
+            .modal-content {
+                max-width: 95%;
+            }
+
+            .message-bubble {
+                max-width: 90%;
+            }
+
+            .floating-btn {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+
+        /* ==================== LOADING SPINNER ==================== */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-top-color: var(--primary-orange);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- BOOTLOADER -->
+    <div id="bootloader">
+        <div class="bootloader-content">
+            <div class="bootloader-logo">🚊</div>
+            <div class="bootloader-text">
+                <h1>SETRAM</h1>
+                <p>سيترام - Initializing AI Feedback System...</p>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- HEADER -->
+        <header>
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <div class="logo-icon">S</div>
+                        <div class="logo-text">
+                            <h1>SETRAM</h1>
+                            <p>Mostaganem Tramway</p>
+                        </div>
+                    </div>
+                    <div class="nav-buttons">
+                        <button class="btn-feedback" onclick="openChatModal()">💬 Share Feedback</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="container">
+                <h2>Your Voice Matters</h2>
+                <p>Share your feedback with our AI-powered system. Get instant analysis, professional documentation, and direct routing to management.</p>
+                <button class="btn-feedback" onclick="openChatModal()">Start Feedback Session</button>
+            </div>
+        </section>
+
+        <!-- FEATURES -->
+        <section class="features">
+            <div class="container">
+                <h2>How It Works</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🧠</div>
+                        <h3>AI-Powered Chat</h3>
+                        <p>Our AI assistant asks clarifying questions to better understand your feedback.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📋</div>
+                        <h3>Q&A Documentation</h3>
+                        <p>Automatic generation of professional Q&A pairs from your conversation.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Sentiment Analysis</h3>
+                        <p>AI analyzes your feedback to determine sentiment and urgency level.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📧</div>
+                        <h3>Email Routing</h3>
+                        <p>Urgent feedback automatically sent to management with full documentation.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💾</div>
+                        <h3>Local Storage</h3>
+                        <p>Your feedback is stored locally before being sent to our database.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Real-Time Updates</h3>
+                        <p>See your feedback status updated in real-time on our dashboard.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- CHAT MODAL -->
+    <div class="modal" id="chatModal">
+        <div class="modal-content">
+            <!-- Header -->
+            <div class="modal-header">
+                <h2>🧠 AI Feedback Assistant</h2>
+                <button class="close-btn" onclick="closeChatModal()">&times;</button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+                <div id="chatPhase">
+                    <!-- Phase 1: Initial Feedback -->
+                    <div id="phase1" class="form-section">
+                        <div class="form-group">
+                            <label>Your Name *</label>
+                            <input type="text" id="userName" placeholder="Full name">
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address *</label>
+                            <input type="email" id="userEmail" placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Your Role *</label>
+                            <select id="userRole">
+                                <option value="">Select role</option>
+                                <option value="Passenger">Passenger</option>
+                                <option value="Worker">SETRAM Worker</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Your Feedback *</label>
+                            <textarea id="initialFeedback" placeholder="Describe your concern, suggestion, or incident..."></textarea>
+                        </div>
+                        <button class="btn-submit" onclick="submitInitialFeedback()">Continue to AI Chat</button>
+                        <div class="status-message" id="statusPhase1"></div>
+                    </div>
+
+                    <!-- Phase 2: AI Questions -->
+                    <div id="phase2" style="display: none;">
+                        <div class="chat-container" id="chatContainer"></div>
+                        <div class="qa-section" id="qaSection"></div>
+                        <div class="form-group">
+                            <textarea id="currentAnswer" placeholder="Your answer..." style="display: none;"></textarea>
+                        </div>
+                        <button class="btn-submit" id="answerBtn" onclick="submitAnswer()" style="display: none;">Submit Answer</button>
+                        <div class="status-message" id="statusPhase2"></div>
+                    </div>
+
+                    <!-- Phase 3: Review & Submit -->
+                    <div id="phase3" style="display: none;">
+                        <div class="chat-container" id="reviewContainer"></div>
+                        <div class="status-message" id="statusPhase3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer">
+                <span style="font-size: 11px; color: #94a3b8;">📧 dicapriowissam@gmail.com</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING BUTTON -->
+    <button class="floating-btn" onclick="openChatModal()">💬</button>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 SETRAM Mostaganem. All rights reserved. | AI-Powered Feedback Platform v2.0</p>
+        </div>
+    </footer>
+
+    <script>
+        // ==================== CONFIGURATION ====================
+        const API_BASE_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000/api' 
+            : '/api';
+
+        let chatState = {
+            name: '',
+            email: '',
+            role: '',
+            initialFeedback: '',
+            questions: [],
+            answers: [],
+            currentQuestionIndex: 0
+        };
+
+        // ==================== BOOTLOADER ====================
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('bootloader').style.display = 'none';
+            }, 5000);
+        });
+
+        // ==================== MODAL FUNCTIONS ====================
+        function openChatModal() {
+            document.getElementById('chatModal').classList.add('active');
+            resetChat();
+        }
+
+        function closeChatModal() {
+            document.getElementById('chatModal').classList.remove('active');
+            resetChat();
+        }
+
+        function resetChat() {
+            chatState = {
+                name: '',
+                email: '',
+                role: '',
+                initialFeedback: '',
+                questions: [],
+                answers: [],
+                currentQuestionIndex: 0
+            };
+            document.getElementById('phase1').style.display = 'block';
+            document.getElementById('phase2').style.display = 'none';
+            document.getElementById('phase3').style.display = 'none';
+            document.getElementById('userName').value = '';
+            document.getElementById('userEmail').value = '';
+            document.getElementById('userRole').value = '';
+            document.getElementById('initialFeedback').value = '';
+        }
+
+        // ==================== PHASE 1: INITIAL FEEDBACK ====================
+        async function submitInitialFeedback() {
+            const name = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            const role = document.getElementById('userRole').value;
+            const feedback = document.getElementById('initialFeedback').value.trim();
+
+            if (!name || !email || !role || !feedback) {
+                showStatus('statusPhase1', 'Please fill all fields', 'error');
+                return;
+            }
+
+            chatState.name = name;
+            chatState.email = email;
+            chatState.role = role;
+            chatState.initialFeedback = feedback;
+
+            showStatus('statusPhase1', 'Generating AI questions...', 'loading');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/questions`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ feedback })
+                });
+
+                const data = await response.json();
+                chatState.questions = data.questions;
+
+                // Move to phase 2
+                document.getElementById('phase1').style.display = 'none';
+                document.getElementById('phase2').style.display = 'block';
+                showQuestion(0);
+            } catch (error) {
+                showStatus('statusPhase1', 'Error: ' + error.message, 'error');
+            }
+        }
+
+        // ==================== PHASE 2: AI QUESTIONS ====================
+        function showQuestion(index) {
+            if (index >= chatState.questions.length) {
+                submitAllAnswers();
+                return;
+            }
+
+            chatState.currentQuestionIndex = index;
+            const question = chatState.questions[index];
+
+            // Add AI message
+            addChatMessage('AI', question);
+
+            // Show answer input
+            const answerInput = document.getElementById('currentAnswer');
+            answerInput.style.display = 'block';
+            answerInput.value = '';
+            answerInput.placeholder = `Answer to question ${index + 1} of ${chatState.questions.length}...`;
+            answerInput.focus();
+
+            document.getElementById('answerBtn').style.display = 'block';
+        }
+
+        function addChatMessage(role, message) {
+            const container = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message message-${role === 'AI' ? 'ai' : 'user'}`;
+            messageDiv.innerHTML = `<div class="message-bubble">${escapeHtml(message)}</div>`;
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function submitAnswer() {
+            const answer = document.getElementById('currentAnswer').value.trim();
+            if (!answer) return;
+
+            addChatMessage('User', answer);
+            chatState.answers.push({
+                question: chatState.questions[chatState.currentQuestionIndex],
+                answer: answer
+            });
+
+            document.getElementById('currentAnswer').value = '';
+            document.getElementById('answerBtn').style.display = 'none';
+
+            // Show next question or submit
+            if (chatState.currentQuestionIndex + 1 < chatState.questions.length) {
+                setTimeout(() => showQuestion(chatState.currentQuestionIndex + 1), 500);
+            } else {
+                setTimeout(() => submitAllAnswers(), 500);
+            }
+        }
+
+        // ==================== PHASE 3: SUBMIT ====================
+        async function submitAllAnswers() {
+            document.getElementById('phase2').style.display = 'none';
+            document.getElementById('phase3').style.display = 'block';
+
+            showStatus('statusPhase3', 'Processing your feedback with AI...', 'loading');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/feedback`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: chatState.name,
+                        email: chatState.email,
+                        role: chatState.role,
+                        initialFeedback: chatState.initialFeedback,
+                        answers: chatState.answers
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Display Q&A documentation
+                    displayQADocumentation(data.qaDoc);
+                    showStatus('statusPhase3', '✅ Feedback submitted successfully! Email sent to management.', 'success');
+
+                    // Store locally
+                    storeLocally(data);
+
+                    setTimeout(() => {
+                        closeChatModal();
+                    }, 3000);
+                } else {
+                    showStatus('statusPhase3', 'Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showStatus('statusPhase3', 'Error: ' + error.message, 'error');
+            }
+        }
+
+        function displayQADocumentation(qaDoc) {
+            const container = document.getElementById('reviewContainer');
+            container.innerHTML = `
+                <h3 style="color: #003087; margin-bottom: 16px;">📋 Your Feedback Summary</h3>
+                <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                    <p style="margin: 0; color: #475569;"><strong>Title:</strong> ${escapeHtml(qaDoc.title)}</p>
+                    <p style="margin: 8px 0 0; color: #475569;"><strong>Category:</strong> ${escapeHtml(qaDoc.category)}</p>
+                    <p style="margin: 8px 0 0; color: #475569;"><strong>Severity:</strong> ${escapeHtml(qaDoc.severity)}</p>
+                </div>
+                <h4 style="color: #003087; margin: 16px 0 8px;">Q&A Documentation</h4>
+                ${qaDoc.qa_pairs.map((pair, idx) => `
+                    <div class="qa-item">
+                        <div class="qa-question">Q${idx + 1}: ${escapeHtml(pair.question)}</div>
+                        <div class="qa-answer">${escapeHtml(pair.answer)}</div>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        // ==================== UTILITIES ====================
+        function showStatus(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = `status-message active status-${type}`;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function storeLocally(data) {
+            try {
+                const feedback = {
+                    id: data.feedbackId,
+                    timestamp: new Date().toISOString(),
+                    ...chatState,
+                    qaDoc: data.qaDoc,
+                    sentiment: data.sentiment
+                };
+                localStorage.setItem(`feedback_${data.feedbackId}`, JSON.stringify(feedback));
+            } catch (error) {
+                console.error('Error storing locally:', error);
+            }
+        }
+    </script>
+</body>
+</html>
